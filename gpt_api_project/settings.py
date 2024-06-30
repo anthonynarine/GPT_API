@@ -2,6 +2,9 @@
 import os
 from pathlib import Path
 from decouple import config
+from .logging_conf import julia_fiesta_logs
+
+julia_fiesta_logs()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -9,8 +12,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security settings
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=True, cast=bool)
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'ant-django-auth-62cf01255868.herokuapp.com',
+    'localhost', '127.0.0.1',
+    "localhost:3000"]
 
 
 # Application definition
@@ -24,12 +29,15 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     #3rd party
     "rest_framework",
+    "corsheaders",
+    #local
     "gpt_app",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -109,3 +117,25 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://ant-django-auth-62cf01255868.herokuapp.com",
+    'https://gait.netlify.app',
+    # Additional origins...
+]
+CORS_ALLOW_CREDENTIALS = True
+
+# CSRF settings
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    "https://ant-django-auth-62cf01255868.herokuapp.com",
+    'https://gait.netlify.app',
+    # Additional trusted origins...
+]
+
+
