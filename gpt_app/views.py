@@ -16,6 +16,20 @@ client = OpenAI(api_key=api_key)
 logger = logging.getLogger('gpt_app')
 
 def read_jsonl_file(file_path):
+    """
+    Reads a JSONL file and concatenates the content field from each line.
+
+    Args:
+        file_path (str): The path to the JSONL file.
+
+    Returns:
+        str: Concatenated content from the JSONL file.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        ValueError: If there is a JSON decode error in the file.
+        Exception: If any other error occurs during file reading.
+    """
     content = ""
     try:
         with open(file_path, "r") as file:
@@ -38,7 +52,37 @@ def read_jsonl_file(file_path):
     return content
 
 class GPTView(APIView):
+    """
+    API View to interact with OpenAI's GPT-3.5 model.
+    Handles POST requests to generate a response based on the provided prompt.
+    """
+
+    def options(self, request, *args, **kwargs):
+        """
+        Handles OPTIONS requests for CORS preflight.
+
+        Args:
+            request (Request): The HTTP request object.
+
+        Returns:
+            Response: An HTTP response with the appropriate CORS headers.
+        """
+        response = Response(status=status.HTTP_200_OK)
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+
     def post(self, request):
+        """
+        Handles POST requests to generate a GPT-3.5 response.
+
+        Args:
+            request (Request): The HTTP request containing the 'prompt'.
+
+        Returns:
+            Response: The generated response from GPT-3.5 or an error message.
+        """
         prompt = request.data.get("prompt", "")
         if not prompt:
             logger.debug("No prompt provided")
@@ -88,3 +132,4 @@ class GPTView(APIView):
         except Exception as e:
             logger.error(f"General Error: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
