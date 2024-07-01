@@ -15,6 +15,28 @@ client = OpenAI(api_key=api_key)
 # Get an instance of a logger
 logger = logging.getLogger('gpt_app')
 
+def read_jsonl_file(file_path):
+    content = ""
+    try:
+        with open(file_path, "r") as file:
+            line_number = 0
+            for line in file:
+                line_number += 1
+                try:
+                    json_line = json.loads(line)
+                    content += json_line.get("content", "") + "\n"
+                except json.JSONDecodeError as e:
+                    logger.error(f"JSON Decode Error in line {line_number}: {line.strip()}. Error: {str(e)}")
+                    raise ValueError(f"JSON Decode Error in line {line_number}: {line.strip()}. Error: {str(e)}")
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {file_path}. Error: {str(e)}")
+        raise FileNotFoundError(f"File not found: {file_path}. Error: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error reading file {file_path}: {str(e)}")
+        raise Exception(f"Error reading file {file_path}: {str(e)}")
+
+    return content
+
 class GPTView(APIView):
     def post(self, request):
         prompt = request.data.get("prompt", "")
@@ -22,34 +44,31 @@ class GPTView(APIView):
             logger.debug("No prompt provided")
             return Response({"error": "No prompt provided"}, status=status.HTTP_400_BAD_REQUEST)
         
-        file_path = os.path.join(os.path.dirname(__file__), "assets", "autcollection.jsonl")
-        file_content = ""
+        autcollection_file_path = os.path.join(os.path.dirname(__file__), "assets", "autcollection.jsonl")
+
         try:
-            with open(file_path, "r") as file:
-                for line in file:
-                    file_content += json.loads(line).get("content", "") + "\n"
-        except FileNotFoundError:
-            logger.error("File not found")
-            return Response({"error": "File not found"}, status=status.HTTP_400_BAD_REQUEST)
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON Decode Error: {str(e)}")
-            return Response({"error": f"JSON Decode Error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            autcollection_content = read_jsonl_file(autcollection_file_path)
+        except FileNotFoundError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
-            logger.error(f"Error reading file: {str(e)}")
-            return Response({"error": f"Error reading file: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        combined_content = autcollection_content
         
         try:
             logger.debug(f"Using API key: {api_key}")  # Log the API key
             system_role_content = f"""
             You are an assistant designed to answer questions about a specific application.
             Here is some context about the application from a file:
-            {file_content}
+            {combined_content}
             """
             
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo", 
                 messages=[
-                    {"role": "system", "content": system_role_content },
+                    {"role": "system", "content": system_role_content},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.1,
@@ -69,5 +88,3 @@ class GPTView(APIView):
         except Exception as e:
             logger.error(f"General Error: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
