@@ -16,7 +16,7 @@ ALLOWED_HOSTS = [
     'ant-django-auth-62cf01255868.herokuapp.com',
     'localhost', '127.0.0.1',
     "localhost:3000",
-    'gait-gpt.herokuapp.com',  # Add your Heroku app here
+    'gait-gpt.herokuapp.com', 
 ]
 
 # Application definition
@@ -98,7 +98,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = False  # Temporarily set this to True for debugging
+CORS_ALLOW_ALL_ORIGINS = True  # Temporarily set this to True for debugging
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:3001",
