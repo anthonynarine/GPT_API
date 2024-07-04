@@ -104,7 +104,7 @@ class GPTView(APIView):
         try:
             logger.debug(f"Using API key: {api_key}")  # Log the API key
             system_role_content = f"""
-            You are an assistant designed to answer questions about a specific application.
+            You are an assistant designed to answer questions about Gait's API
             Here is some context about the application from a file:
             {combined_content}
             """
