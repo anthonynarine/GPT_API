@@ -10,7 +10,7 @@ const useGptRequest = () => {
     const [chatHistory, setChatHistory] = useState([]); // State to manage chat history
 
     const base_url = "http://localhost:8000/api/gpt/"
-    const production_url = 'https://gait-gpt.herokuapp.com/api/gpt/'
+    const production_url = 'https://gait-ai-b0b55b4bd581.herokuapp.com/api/gpt/'
     // Function to make a request to the GPT API
     const requestToGpt = useCallback(async (prompt) => {
 
